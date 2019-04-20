@@ -17,14 +17,14 @@ We demonstrate how to integrate these task variables with off-policy RL algorith
 and adaptation efficiency. Our method outperforms prior algorithms in sample efficiency by 20-100X as well as
 in asymptotic performance on several meta-RL benchmarks.
 
-This is a limited release of our implementation, containing code and scripts for reproducing the continous control shaped reward results (Figure 3). We will follow up soon with the posterior sampling, sparse reward, and ablation experiments. In the meantime, this is a **work-in-progress** and is not yet a reference implementation of our paper.
+This is the reference implementation of the algorithm; however, some scripts for reproducing a few of the experiments from the paper are missing.
 
 This repository is based on rlkit: https://github.com/vitchyr/rlkit
 
 #### TODO (where is my tiny fork?)
-- [ ] add rest of experiments from the paper
-- [ ] include detailed instructions for setup and reproducing experiments
-- [ ] overhaul abstractions to better fit meta-RL
+- [ ] add Walker2D and ablation experiment scripts
+- [ ] add jupyter notebook to visualize sparse point robot
+- [ ] submodule `viskit` for a self-contained codebase
 
 --------------------------------------
 
@@ -32,17 +32,16 @@ This repository is based on rlkit: https://github.com/vitchyr/rlkit
 
 We recommend using anaconda - create our environment with `conda env create -f environment.yml`
 
-Scripts for all experiments are in `./scripts`
+Experiments are configured via `json` configuration files located in `./configs`. To reproduce an experiment, run:
+`python launch_experiment.py ./configs/[EXP].json`
 
-By default the code will use the GPU - to use CPU instead, set `use_gpu=False` in the appropriate script.
+By default the code will use the GPU - to use CPU instead, set `use_gpu=False` in the appropriate config file.
 
-For example, to train PEARL on Half-Cheetah-Dir with default settings, from the root directory run `python scripts/sac_cheetah_dir.py [GPU ID]`.
-
-Output files will be written to `./output/[ENV]/[EXP NAME]`
+Output files will be written to `./output/[ENV]/[EXP NAME]` where the experiment name is uniquely generated based on the date.
 
 The file `progress.csv` contains statistics logged over the course of training.
 
-We recommend viskit for visualizing learning curves: https://github.com/vitchyr/viskit
+We recommend `viskit` for visualizing learning curves: https://github.com/vitchyr/viskit
 
 --------------------------------------
 #### Communication (slurp!)
