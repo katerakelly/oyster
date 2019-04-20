@@ -1,6 +1,10 @@
 import numpy as np
+
+from . import register_env
 from .half_cheetah import HalfCheetahEnv
 
+
+@register_env('cheetah-vel')
 class HalfCheetahVelEnv(HalfCheetahEnv):
     """Half-cheetah environment with target velocity, as described in [1]. The
     code is adapted from
@@ -19,7 +23,7 @@ class HalfCheetahVelEnv(HalfCheetahEnv):
         model-based control", 2012
         (https://homes.cs.washington.edu/~todorov/papers/TodorovIROS12.pdf)
     """
-    def __init__(self, task={}, n_tasks=2):
+    def __init__(self, task={}, n_tasks=2, randomize_tasks=True):
         self._task = task
         self.tasks = self.sample_tasks(n_tasks)
         self._goal_vel = self.tasks[0].get('velocity', 0.0)
@@ -43,6 +47,7 @@ class HalfCheetahVelEnv(HalfCheetahEnv):
         return (observation, reward, done, infos)
 
     def sample_tasks(self, num_tasks):
+        np.random.seed(1337)
         velocities = np.random.uniform(0.0, 3.0, size=(num_tasks,))
         tasks = [{'velocity': velocity} for velocity in velocities]
         return tasks

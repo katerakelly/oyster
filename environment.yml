@@ -6,9 +6,10 @@ channels:
   - defaults
 dependencies:
   - backcall=0.1.0=py35_0
-  - ca-certificates=2018.03.07=0
+  - ca-certificates=2019.1.23=0
   - certifi=2018.8.24=py35_1
   - cffi=1.11.5=py35he75722e_1
+  - cudatoolkit=9.0=h13b8566_0
   - cycler=0.10.0=py35hc4d5149_0
   - cython=0.28.5=py35hf484d3e_0
   - dbus=1.13.2=h714fa37_1
@@ -44,7 +45,7 @@ dependencies:
   - ninja=1.8.2=py35h6bb024c_1
   - numba=0.35.0=np111py35_0
   - numpy=1.11.3=py35h3dfced4_4
-  - openssl=1.0.2p=h14c3975_0
+  - openssl=1.0.2r=h7b6447c_0
   - parso=0.3.1=py35_0
   - patchelf=0.9=he6710b0_3
   - path.py=10.3.1=py35_0
@@ -52,7 +53,6 @@ dependencies:
   - pexpect=4.6.0=py35_0
   - pickleshare=0.7.4=py35hd57304d_0
   - pip=10.0.1=py35_0
-  - prompt_toolkit=1.0.15=py35hc09de7a_0
   - ptyprocess=0.6.0=py35_0
   - pybox2d=2.3.1post2=py35_0
   - pycparser=2.19=py35_0
@@ -61,7 +61,7 @@ dependencies:
   - pyqt=5.6.0=py35_2
   - python=3.5.2=0
   - python-dateutil=2.6.1=py35_0
-  - pytorch=0.4.1=py35_py27__9.0.176_7.1.2_2
+  - pytorch=1.0.1=py3.5_cuda9.0.176_cudnn7.4.2_2
   - pytz=2018.5=py35_0
   - qt=5.6.2=5
   - readline=6.2=2
@@ -112,6 +112,7 @@ dependencies:
     - pandocfilters==1.4.2
     - pillow==5.3.0
     - prometheus-client==0.5.0
+    - prompt-toolkit==1.0.15
     - pygame==1.9.2
     - pyglet==1.3.2
     - pyopengl==3.1.0
@@ -127,5 +128,4 @@ dependencies:
     - urllib3==1.24.1
     - webencodings==0.5.1
     - widgetsnbextension==3.4.2
-prefix: /home/rakelly/miniconda3/envs/rlkit
 
