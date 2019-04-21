@@ -24,13 +24,17 @@ This repository is based on rlkit: https://github.com/vitchyr/rlkit
 #### TODO (where is my tiny fork?)
 - [ ] add Walker2D and ablation experiment scripts
 - [ ] add jupyter notebook to visualize sparse point robot
+- [ ] policy simulation script
 - [ ] submodule `viskit` for a self-contained codebase
 
 --------------------------------------
 
-#### Some bare-bones instructions (just a squeeze of lemon):
+#### Instructions (just a squeeze of lemon)
 
-We recommend using anaconda - create our environment with `conda env create -f environment.yml`
+To run the continous control benchmark experiments, first install [MuJoCo 1.5](https://www.roboti.us/index.html).
+Note that you will need to set `LD_LIBRARY_PATH` to point to both the MuJoCo binaries (something like `/$HOME/.mujoco/mjpro150/bin`) as well as the gpu drivers (something like `/usr/lib/nvidia-390`).
+For the remaining dependencies, we recommend using [miniconda](https://docs.conda.io/en/latest/miniconda.html) - create our environment with `conda env create -f environment.yml`
+This installation has been tested only on 64-bit Ubuntu 16.04.
 
 Experiments are configured via `json` configuration files located in `./configs`. To reproduce an experiment, run:
 `python launch_experiment.py ./configs/[EXP].json`
