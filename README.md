@@ -19,7 +19,8 @@ in asymptotic performance on several meta-RL benchmarks.
 
 This is the reference implementation of the algorithm; however, some scripts for reproducing a few of the experiments from the paper are missing.
 
-This repository is based on rlkit: https://github.com/vitchyr/rlkit
+This repository is based on [rlkit](https://github.com/vitchyr/rlkit).
+We ran our ProMP, MAML-TRPO, and RL2 baselines in the [reference ProMP repo](https://github.com/jonasrothfuss/ProMP) and our MAESN comparison in the [reference MAESN repo](https://github.com/RussellM2020/maesn_suite).
 
 #### TODO (where is my tiny fork?)
 - [ ] add Walker2D and ablation experiment scripts
