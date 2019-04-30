@@ -1,7 +1,11 @@
 import numpy as np
+
 from rlkit.envs.ant_multitask_base import MultitaskAntEnv
+from . import register_env
+
 
 # Copy task structure from https://github.com/jonasrothfuss/ProMP/blob/master/meta_policy_search/envs/mujoco_envs/ant_rand_goal.py
+@register_env('ant-goal')
 class AntGoalEnv(MultitaskAntEnv):
     def __init__(self, task={}, n_tasks=2, **kwargs):
         super(AntGoalEnv, self).__init__(task, n_tasks, **kwargs)

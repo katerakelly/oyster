@@ -1,6 +1,10 @@
 import numpy as np
-from .half_cheetah import HalfCheetahEnv
 
+from .half_cheetah import HalfCheetahEnv
+from . import register_env
+
+
+@register_env('cheetah-dir')
 class HalfCheetahDirEnv(HalfCheetahEnv):
     """Half-cheetah environment with target direction, as described in [1]. The
     code is adapted from

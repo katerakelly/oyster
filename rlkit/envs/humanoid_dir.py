@@ -1,11 +1,15 @@
 import numpy as np
+
 from gym.envs.mujoco import HumanoidEnv as HumanoidEnv
+from . import register_env
 
 def mass_center(model, sim):
     mass = np.expand_dims(model.body_mass, 1)
     xpos = sim.data.xipos
     return (np.sum(mass * xpos, 0) / np.sum(mass))
 
+
+@register_env('humanoid-dir')
 class HumanoidDirEnv(HumanoidEnv):
 
     def __init__(self, task={}, n_tasks=2):
@@ -29,9 +33,9 @@ class HumanoidDirEnv(HumanoidEnv):
         qpos = self.sim.data.qpos
         done = bool((qpos[2] < 1.0) or (qpos[2] > 2.0))
 
-        return self._get_obs(), reward, done, dict(reward_linvel=lin_vel_cost, 
-                                                   reward_quadctrl=-quad_ctrl_cost, 
-                                                   reward_alive=alive_bonus, 
+        return self._get_obs(), reward, done, dict(reward_linvel=lin_vel_cost,
+                                                   reward_quadctrl=-quad_ctrl_cost,
+                                                   reward_alive=alive_bonus,
                                                    reward_impact=-quad_impact_cost)
 
     def _get_obs(self):
