@@ -24,7 +24,7 @@ We ran our ProMP, MAML-TRPO, and RL2 baselines in the [reference ProMP repo](htt
 
 #### TODO (where is my tiny fork?)
 - [ ] add Walker2D and ablation experiment scripts
-- [ ] add jupyter notebook to visualize sparse point robot
+- [x] add jupyter notebook to visualize sparse point robot
 - [ ] policy simulation script
 - [ ] submodule `viskit` for a self-contained codebase
 
