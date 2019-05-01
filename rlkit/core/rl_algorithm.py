@@ -380,14 +380,18 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
         final_returns = []
         online_returns = []
         for idx in indices:
-            runs, all_rets = [], []
+            all_rets = []
             for r in range(self.num_evals):
                 paths = self.collect_paths(idx, epoch, r)
                 all_rets.append([eval_util.get_average_returns([p]) for p in paths])
-                runs.append(paths)
+            final_returns.append(np.mean([a[-1] for a in all_rets]))
+            # record online returns for the first n trajectories
+            n = min([len(a) for a in all_rets])
+            all_rets = [a[:n] for a in all_rets]
             all_rets = np.mean(np.stack(all_rets), axis=0) # avg return per nth rollout
-            final_returns.append(all_rets[-1])
             online_returns.append(all_rets)
+        n = min([len(t) for t in online_returns])
+        online_returns = [t[:n] for t in online_returns]
         return final_returns, online_returns
 
     def evaluate(self, epoch):
