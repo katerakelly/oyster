@@ -7,7 +7,7 @@ from . import register_env
 @register_env('ant-dir')
 class AntDirEnv(MultitaskAntEnv):
 
-    def __init__(self, task={}, n_tasks=2, forward_backward=False, **kwargs):
+    def __init__(self, task={}, n_tasks=2, forward_backward=False, randomize_tasks=True, **kwargs):
         self.forward_backward = forward_backward
         super(AntDirEnv, self).__init__(task, n_tasks, **kwargs)
 
@@ -44,7 +44,6 @@ class AntDirEnv(MultitaskAntEnv):
             assert num_tasks == 2
             velocities = np.array([0., np.pi])
         else:
-            # velocities = np.random.uniform(0., 1.0 * np.pi, size=(num_tasks,))
             velocities = np.random.uniform(0., 2.0 * np.pi, size=(num_tasks,))
         tasks = [{'goal': velocity} for velocity in velocities]
         return tasks

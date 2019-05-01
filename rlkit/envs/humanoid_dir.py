@@ -12,7 +12,7 @@ def mass_center(model, sim):
 @register_env('humanoid-dir')
 class HumanoidDirEnv(HumanoidEnv):
 
-    def __init__(self, task={}, n_tasks=2):
+    def __init__(self, task={}, n_tasks=2, randomize_tasks=True):
         self.tasks = self.sample_tasks(n_tasks)
         self.reset_task(0)
         super(HumanoidDirEnv, self).__init__()
