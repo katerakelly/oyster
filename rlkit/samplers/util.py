@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def rollout(env, agent, max_path_length=np.inf, accum_context=True, resample_z=False, animated=False):
+def rollout(env, agent, max_path_length=np.inf, accum_context=True, animated=False, save_frames=False):
     """
     The following value for the following keys will be a 2D array, with the
     first dimension corresponding to the time dimension.
@@ -19,8 +19,9 @@ def rollout(env, agent, max_path_length=np.inf, accum_context=True, resample_z=F
     :param env:
     :param agent:
     :param max_path_length:
-    :param animated:
     :param accum_context: if True, accumulate the collected context
+    :param animated:
+    :param save_frames: if True, save video of rollout
     :return:
     """
     observations = []
@@ -32,6 +33,7 @@ def rollout(env, agent, max_path_length=np.inf, accum_context=True, resample_z=F
     o = env.reset()
     next_o = None
     path_length = 0
+
     if animated:
         env.render()
     while path_length < max_path_length:
@@ -45,13 +47,17 @@ def rollout(env, agent, max_path_length=np.inf, accum_context=True, resample_z=F
         terminals.append(d)
         actions.append(a)
         agent_infos.append(agent_info)
-        env_infos.append(env_info)
         path_length += 1
         if d:
             break
         o = next_o
         if animated:
             env.render()
+        if save_frames:
+            from PIL import Image
+            image = Image.fromarray(np.flipud(env.get_image()))
+            env_info['frame'] = image
+        env_infos.append(env_info)
 
     actions = np.array(actions)
     if len(actions.shape) == 1:
