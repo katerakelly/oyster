@@ -449,7 +449,7 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
         self.agent.log_diagnostics(self.eval_statistics)
 
         if hasattr(self.env, "log_diagnostics"):
-            self.env.log_diagnostics(paths)
+            self.env.log_diagnostics(paths, prefix=None)
 
         avg_train_return = np.mean(train_final_returns)
         avg_test_return = np.mean(test_final_returns)

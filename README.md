@@ -23,7 +23,7 @@ This repository is based on [rlkit](https://github.com/vitchyr/rlkit).
 We ran our ProMP, MAML-TRPO, and RL2 baselines in the [reference ProMP repo](https://github.com/jonasrothfuss/ProMP) and our MAESN comparison in the [reference MAESN repo](https://github.com/RussellM2020/maesn_suite).
 
 #### TODO (where is my tiny fork?)
-- [ ] add Walker2D and ablation experiment scripts
+- [x] add Walker2D and ablation experiment scripts
 - [x] add jupyter notebook to visualize sparse point robot
 - [ ] policy simulation script
 - [ ] submodule `viskit` for a self-contained codebase
@@ -47,6 +47,9 @@ Output files will be written to `./output/[ENV]/[EXP NAME]` where the experiment
 The file `progress.csv` contains statistics logged over the course of training.
 
 We recommend `viskit` for visualizing learning curves: https://github.com/vitchyr/viskit
+
+To run environments where different tasks correspond to different model parameters (Walker and Hopper), MuJoCo131 is required. 
+The environments require the moduel rand_param_envs which can be found at https://github.com/dennisl88/rand_param_envs.
 
 --------------------------------------
 #### Communication (slurp!)
