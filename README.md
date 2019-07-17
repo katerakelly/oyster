@@ -27,6 +27,7 @@ We ran our ProMP, MAML-TRPO, and RL2 baselines in the [reference ProMP repo](htt
 - [x] add jupyter notebook to visualize sparse point robot
 - [ ] policy simulation script
 - [ ] submodule `viskit` for a self-contained codebase
+- [ ] add working Dockerfile for running experiments
 
 --------------------------------------
 
