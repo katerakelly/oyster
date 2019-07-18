@@ -7,6 +7,7 @@
     }
     ,
     "algo_params": {
+        "use_next_obs_in_context": true,
         "meta_batch": 10,
         "num_initial_steps": 2000,
         "num_steps_prior": 400,

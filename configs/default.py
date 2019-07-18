@@ -36,6 +36,7 @@ default_config = dict(
         sparse_rewards=False, # whether to sparsify rewards as determined in env
         kl_lambda=.1, # weight on KL divergence term in encoder loss
         use_information_bottleneck=True, # False makes latent context deterministic
+        use_next_obs_in_context=False, # use next obs if it is useful in distinguishing tasks
         update_post_train=1, # how often to resample the context when collecting data during training (in trajectories)
         num_exp_traj_eval=1, # how many exploration trajs to collect before beginning posterior sampling at test time
         recurrent=False, # recurrent or permutation-invariant encoder

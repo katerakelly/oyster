@@ -30,6 +30,7 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
             optimizer_class=optim.Adam,
             recurrent=False,
             use_information_bottleneck=True,
+            use_next_obs_in_context=False,
             sparse_rewards=False,
 
             soft_target_tau=1e-2,
@@ -62,6 +63,7 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
 
         self.use_information_bottleneck = use_information_bottleneck
         self.sparse_rewards = sparse_rewards
+        self.use_next_obs_in_context = use_next_obs_in_context
 
         self.qf1, self.qf2, self.vf = nets[1:]
         self.target_vf = self.vf.copy()
@@ -133,20 +135,24 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
         terms = torch.cat(terms, dim=0)
         return [obs, actions, rewards, next_obs, terms]
 
-    def prepare_encoder_data(self, obs, act, rewards):
+    def prepare_encoder_data(self, obs, act, rewards, next_obs):
         ''' prepare context for encoding '''
-        # for now we embed only observations and rewards
-        # assume obs and rewards are (task, batch, feat)
-        task_data = torch.cat([obs, act, rewards], dim=2)
+        # assume dimensions are (task, batch, feat)
+        if self.use_next_obs_in_context:
+            task_data = torch.cat([obs, act, rewards, next_obs], dim=2)
+        else:
+            task_data = torch.cat([obs, act, rewards], dim=2)
         return task_data
 
+    # AZ: is this even used?
     def prepare_context(self, idx):
         ''' sample context from replay buffer and prepare it '''
         batch = ptu.np_to_pytorch_batch(self.enc_replay_buffer.random_batch(idx, batch_size=self.embedding_batch_size, sequence=self.recurrent))
         obs = batch['observations'][None, ...]
         act = batch['actions'][None, ...]
         rewards = batch['rewards'][None, ...]
-        context = self.prepare_encoder_data(obs, act, rewards)
+        next_obs = batch['next_observations'][None, ...]
+        context = self.prepare_encoder_data(obs, act, rewards, next_obs)
         return context
 
     ##### Training #####
@@ -161,8 +167,8 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
 
         for i in range(num_updates):
             mini_batch = [x[:, i * mb_size: i * mb_size + mb_size, :] for x in batch]
-            obs_enc, act_enc, rewards_enc, _, _ = mini_batch
-            context = self.prepare_encoder_data(obs_enc, act_enc, rewards_enc)
+            obs_enc, act_enc, rewards_enc, next_obs, _ = mini_batch
+            context = self.prepare_encoder_data(obs_enc, act_enc, rewards_enc, next_obs)
             self._take_step(indices, context)
 
             # stop backprop

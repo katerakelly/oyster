@@ -57,6 +57,7 @@ class PEARLAgent(nn.Module):
         self.recurrent = kwargs['recurrent']
         self.use_ib = kwargs['use_information_bottleneck']
         self.sparse_rewards = kwargs['sparse_rewards']
+        self.use_next_obs_in_context = kwargs['use_next_obs_in_context']
 
         # initialize buffers for z dist and z
         # use buffers so latent context can be saved along with model weights
@@ -100,7 +101,12 @@ class PEARLAgent(nn.Module):
         o = ptu.from_numpy(o[None, None, ...])
         a = ptu.from_numpy(a[None, None, ...])
         r = ptu.from_numpy(np.array([r])[None, None, ...])
-        data = torch.cat([o, a, r], dim=2)
+        no = ptu.from_numpy(no[None, None, ...])
+
+        if self.use_next_obs_in_context:
+            data = torch.cat([o, a, r, no], dim=2)
+        else:
+            data = torch.cat([o, a, r], dim=2)
         if self.context is None:
             self.context = data
         else:
