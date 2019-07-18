@@ -27,19 +27,20 @@ def experiment(variant):
     tasks = env.get_all_task_idx()
     obs_dim = int(np.prod(env.observation_space.shape))
     action_dim = int(np.prod(env.action_space.shape))
+    reward_dim = 1
 
     # instantiate networks
     latent_dim = variant['latent_size']
-    context_encoder = latent_dim * 2 if variant['algo_params']['use_information_bottleneck'] else latent_dim
-    reward_dim = 1
+    context_encoder_input_dim = 2 * obs_dim + action_dim + reward_dim if variant['algo_params']['use_next_obs_in_context'] else obs_dim + action_dim + reward_dim
+    context_encoder_output_dim = latent_dim * 2 if variant['algo_params']['use_information_bottleneck'] else latent_dim
     net_size = variant['net_size']
     recurrent = variant['algo_params']['recurrent']
     encoder_model = RecurrentEncoder if recurrent else MlpEncoder
 
     context_encoder = encoder_model(
         hidden_sizes=[200, 200, 200],
-        input_size=obs_dim + action_dim + reward_dim,
-        output_size=context_encoder,
+        input_size=context_encoder_input_dim,
+        output_size=context_encoder_output_dim,
     )
     qf1 = FlattenMlp(
         hidden_sizes=[net_size, net_size, net_size],
