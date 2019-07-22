@@ -144,13 +144,15 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
             task_data = torch.cat([obs, act, rewards], dim=2)
         return task_data
 
-    # AZ: is this even used?
     def prepare_context(self, idx):
         ''' sample context from replay buffer and prepare it '''
         batch = ptu.np_to_pytorch_batch(self.enc_replay_buffer.random_batch(idx, batch_size=self.embedding_batch_size, sequence=self.recurrent))
         obs = batch['observations'][None, ...]
         act = batch['actions'][None, ...]
-        rewards = batch['rewards'][None, ...]
+        if self.sparse_rewards:
+            rewards = batch['sparse_rewards'][None, ...]
+        else:
+            rewards = batch['rewards'][None, ...]
         next_obs = batch['next_observations'][None, ...]
         context = self.prepare_encoder_data(obs, act, rewards, next_obs)
         return context
