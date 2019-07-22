@@ -225,7 +225,7 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
             if add_to_enc_buffer:
                 self.enc_replay_buffer.add_paths(self.task_idx, paths)
             if update_posterior_rate != np.inf:
-                context = self.prepare_context(self.task_idx)
+                context = self.sample_context(self.task_idx)
                 self.agent.infer_posterior(context)
         self._n_env_steps_total += num_transitions
         gt.stamp('sample')
@@ -419,7 +419,7 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
             self.env.reset_task(idx)
             paths = []
             for _ in range(self.num_steps_per_eval // self.max_path_length):
-                context = self.prepare_context(idx)
+                context = self.sample_context(idx)
                 self.agent.infer_posterior(context)
                 p, _ = self.sampler.obtain_samples(deterministic=self.eval_deterministic, max_samples=self.max_path_length,
                                                         accum_context=False,

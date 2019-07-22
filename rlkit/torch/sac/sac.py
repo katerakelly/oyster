@@ -105,56 +105,46 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
             net.to(device)
 
     ##### Data handling #####
-    def sample_data(self, indices, encoder=False):
-        ''' sample data from replay buffers to construct a training meta-batch '''
-        # collect data from multiple tasks for the meta-batch
-        obs, actions, rewards, next_obs, terms = [], [], [], [], []
-        for idx in indices:
-            if encoder:
-                batch = ptu.np_to_pytorch_batch(self.enc_replay_buffer.random_batch(idx, batch_size=self.embedding_batch_size, sequence=self.recurrent))
-            else:
-                batch = ptu.np_to_pytorch_batch(self.replay_buffer.random_batch(idx, batch_size=self.batch_size))
-            o = batch['observations'][None, ...]
-            a = batch['actions'][None, ...]
-            if encoder and self.sparse_rewards:
-                # in sparse reward settings, only the encoder is trained with sparse reward
-                r = batch['sparse_rewards'][None, ...]
-            else:
-                r = batch['rewards'][None, ...]
-            no = batch['next_observations'][None, ...]
-            t = batch['terminals'][None, ...]
-            obs.append(o)
-            actions.append(a)
-            rewards.append(r)
-            next_obs.append(no)
-            terms.append(t)
-        obs = torch.cat(obs, dim=0)
-        actions = torch.cat(actions, dim=0)
-        rewards = torch.cat(rewards, dim=0)
-        next_obs = torch.cat(next_obs, dim=0)
-        terms = torch.cat(terms, dim=0)
-        return [obs, actions, rewards, next_obs, terms]
+    def unpack_batch(self, batch, sparse_reward=False):
+        ''' unpack a batch and return individual elements '''
+        o = batch['observations'][None, ...]
+        a = batch['actions'][None, ...]
+        if sparse_reward:
+            r = batch['sparse_rewards'][None, ...]
+        else:
+            r = batch['rewards'][None, ...]
+        no = batch['next_observations'][None, ...]
+        t = batch['terminals'][None, ...]
+        return [o, a, r, no, t]
 
-    def prepare_encoder_data(self, obs, act, rewards, next_obs):
-        ''' prepare context for encoding '''
-        # assume dimensions are (task, batch, feat)
+    def sample_sac(self, indices):
+        ''' sample batch of training data from a list of tasks for training the actor-critic '''
+        # this batch consists of transitions sampled randomly from replay buffer
+        # rewards are always dense
+        batches = [ptu.np_to_pytorch_batch(self.replay_buffer.random_batch(idx, batch_size=self.batch_size)) for idx in indices]
+        unpacked = [self.unpack_batch(batch) for batch in batches]
+        # group like elements together
+        unpacked = [[x[i] for x in unpacked] for i in range(len(unpacked[0]))]
+        unpacked = [torch.cat(x, dim=0) for x in unpacked]
+        return unpacked
+
+    def sample_context(self, indices):
+        ''' sample batch of context from a list of tasks from the replay buffer '''
+        # make method work given a single task index
+        if not hasattr(indices, '__iter__'):
+            indices = [indices]
+        batches = [ptu.np_to_pytorch_batch(self.enc_replay_buffer.random_batch(idx, batch_size=self.embedding_batch_size, sequence=self.recurrent)) for idx in indices]
+        context = [self.unpack_batch(batch, sparse_reward=self.sparse_rewards) for batch in batches]
+        # group like elements together
+        context = [[x[i] for x in context] for i in range(len(context[0]))]
+        context = [torch.cat(x, dim=0) for x in context]
+        # full context consists of [obs, act, rewards, next_obs, terms]
+        # if dynamics don't change across tasks, don't include next_obs
+        # don't include terminals in context
         if self.use_next_obs_in_context:
-            task_data = torch.cat([obs, act, rewards, next_obs], dim=2)
+            context = torch.cat(context[:-1], dim=2)
         else:
-            task_data = torch.cat([obs, act, rewards], dim=2)
-        return task_data
-
-    def prepare_context(self, idx):
-        ''' sample context from replay buffer and prepare it '''
-        batch = ptu.np_to_pytorch_batch(self.enc_replay_buffer.random_batch(idx, batch_size=self.embedding_batch_size, sequence=self.recurrent))
-        obs = batch['observations'][None, ...]
-        act = batch['actions'][None, ...]
-        if self.sparse_rewards:
-            rewards = batch['sparse_rewards'][None, ...]
-        else:
-            rewards = batch['rewards'][None, ...]
-        next_obs = batch['next_observations'][None, ...]
-        context = self.prepare_encoder_data(obs, act, rewards, next_obs)
+            context = torch.cat(context[:-2], dim=2)
         return context
 
     ##### Training #####
@@ -162,15 +152,15 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
         mb_size = self.embedding_mini_batch_size
         num_updates = self.embedding_batch_size // mb_size
 
-        batch = self.sample_data(indices, encoder=True)
+        # sample context batch
+        context_batch = self.sample_context(indices)
 
         # zero out context and hidden encoder state
         self.agent.clear_z(num_tasks=len(indices))
 
+        # do this in a loop so we can truncate backprop in the recurrent encoder
         for i in range(num_updates):
-            mini_batch = [x[:, i * mb_size: i * mb_size + mb_size, :] for x in batch]
-            obs_enc, act_enc, rewards_enc, next_obs, _ = mini_batch
-            context = self.prepare_encoder_data(obs_enc, act_enc, rewards_enc, next_obs)
+            context = context_batch[:, i * mb_size: i * mb_size + mb_size, :]
             self._take_step(indices, context)
 
             # stop backprop
@@ -190,7 +180,7 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
         num_tasks = len(indices)
 
         # data is (task, batch, feat)
-        obs, actions, rewards, next_obs, terms = self.sample_data(indices)
+        obs, actions, rewards, next_obs, terms = self.sample_sac(indices)
 
         # run inference in networks
         policy_outputs, task_z = self.agent(obs, context)
