@@ -33,7 +33,9 @@ We ran our ProMP, MAML-TRPO, and RL2 baselines in the [reference ProMP repo](htt
 
 #### Instructions (just a squeeze of lemon)
 
-To run the continous control benchmark experiments, first install [MuJoCo 1.5](https://www.roboti.us/index.html).
+Clone this repo with `git clone --recurse-submodules`.
+To run the continous control benchmark experiments, you will need to install [MuJoCo 1.5](https://www.roboti.us/index.html).
+(To run environments where different tasks correspond to different model parameters (Walker and Hopper), MuJoCo131 is required.)
 Note that you will need to set `LD_LIBRARY_PATH` to point to both the MuJoCo binaries (something like `/$HOME/.mujoco/mjpro150/bin`) as well as the gpu drivers (something like `/usr/lib/nvidia-390`).
 For the remaining dependencies, we recommend using [miniconda](https://docs.conda.io/en/latest/miniconda.html) - create our environment with `conda env create -f environment.yml`
 This installation has been tested only on 64-bit Ubuntu 16.04.
@@ -48,9 +50,6 @@ Output files will be written to `./output/[ENV]/[EXP NAME]` where the experiment
 The file `progress.csv` contains statistics logged over the course of training.
 
 We recommend `viskit` for visualizing learning curves: https://github.com/vitchyr/viskit
-
-To run environments where different tasks correspond to different model parameters (Walker and Hopper), MuJoCo131 is required. 
-The environments require the moduel rand_param_envs which can be found at https://github.com/dennisl88/rand_param_envs.
 
 --------------------------------------
 #### Communication (slurp!)
