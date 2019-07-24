@@ -18,9 +18,10 @@ and adaptation efficiency. Our method outperforms prior algorithms in sample eff
 in asymptotic performance on several meta-RL benchmarks.
 
 This is the reference implementation of the algorithm; however, some scripts for reproducing a few of the experiments from the paper are missing.
-
 This repository is based on [rlkit](https://github.com/vitchyr/rlkit).
+
 We ran our ProMP, MAML-TRPO, and RL2 baselines in the [reference ProMP repo](https://github.com/jonasrothfuss/ProMP) and our MAESN comparison in the [reference MAESN repo](https://github.com/RussellM2020/maesn_suite).
+The results for PEARL as well as all baselines on the six continuous control tasks shown in Figure 3 may be downloaded [here](https://www.dropbox.com/s/3uorwtrqzury6wt/results_cont_control.zip?dl=0).
 
 #### TODO (where is my tiny fork?)
 - [x] add Walker2D and ablation experiment scripts
