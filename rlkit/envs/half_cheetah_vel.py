@@ -1,4 +1,5 @@
 import numpy as np
+import mujoco_py
 
 from . import register_env
 from .half_cheetah import HalfCheetahEnv
@@ -60,3 +61,33 @@ class HalfCheetahVelEnv(HalfCheetahEnv):
         self._goal_vel = self._task['velocity']
         self._goal = self._goal_vel
         self.reset()
+
+@register_env('cheetah-vel-img')
+class HalfCheetahVelImageEnv(HalfCheetahVelEnv):
+    '''
+    wrapper for half-cheetah velocity env that returns image obs
+    '''
+
+    def _get_obs(self):
+        return self.get_image().flatten()
+
+    def get_image(self, width=64, height=64, camera_name=None):
+        # use sim.render to avoid MJViewer which doesn't seem to work without display
+        img = self.sim.render(
+            width=width,
+            height=height,
+            camera_name=camera_name,
+        )
+        img = np.flipud(img)
+        return img
+
+    def initialize_camera(self):
+        # set camera parameters for viewing
+        sim = self.sim
+        viewer = mujoco_py.MjRenderContextOffscreen(sim)
+        camera = viewer.cam
+        camera.type = 1
+        camera.trackbodyid = 0
+        camera.elevation = -20
+        sim.add_render_context(viewer)
+

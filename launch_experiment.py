@@ -12,7 +12,7 @@ import torch
 from rlkit.envs import ENVS
 from rlkit.envs.wrappers import NormalizedBoxEnv
 from rlkit.torch.sac.policies import TanhGaussianPolicy
-from rlkit.torch.networks import FlattenMlp, MlpEncoder, RecurrentEncoder
+from rlkit.torch.networks import FlattenMlp, MlpEncoder, RecurrentEncoder, Convnet
 from rlkit.torch.sac.sac import PEARLSoftActorCritic
 from rlkit.torch.sac.agent import PEARLAgent
 from rlkit.launchers.launcher_util import setup_logger
@@ -22,6 +22,7 @@ from configs.default import default_config
 
 def experiment(variant):
 
+    obs_mode = variant['obs_mode']
     # create multi-task environment and sample tasks
     env = NormalizedBoxEnv(ENVS[variant['env_name']](**variant['env_params']))
     tasks = env.get_all_task_idx()
@@ -30,6 +31,12 @@ def experiment(variant):
     reward_dim = 1
 
     # instantiate networks
+    cnn = None
+    if obs_mode == 'image':
+        obs_dim = 256
+        image_dim = 64
+        cnn = Convnet(img_size=(image_dim, image_dim, 3), output_dim=obs_dim)
+
     latent_dim = variant['latent_size']
     context_encoder_input_dim = 2 * obs_dim + action_dim + reward_dim if variant['algo_params']['use_next_obs_in_context'] else obs_dim + action_dim + reward_dim
     context_encoder_output_dim = latent_dim * 2 if variant['algo_params']['use_information_bottleneck'] else latent_dim
@@ -67,13 +74,14 @@ def experiment(variant):
         latent_dim,
         context_encoder,
         policy,
+        cnn,
         **variant['algo_params']
     )
     algorithm = PEARLSoftActorCritic(
         env=env,
         train_tasks=list(tasks[:variant['n_train_tasks']]),
         eval_tasks=list(tasks[-variant['n_eval_tasks']:]),
-        nets=[agent, qf1, qf2, vf],
+        nets=[agent, qf1, qf2, vf, cnn],
         latent_dim=latent_dim,
         **variant['algo_params']
     )
@@ -88,6 +96,8 @@ def experiment(variant):
         # TODO hacky, revisit after model refactor
         algorithm.networks[-2].load_state_dict(torch.load(os.path.join(path, 'target_vf.pth')))
         policy.load_state_dict(torch.load(os.path.join(path, 'policy.pth')))
+        if obs_mode == 'image':
+            cnn.load_state_dict(torch.load(os.path.join(path, 'cnn.pth')))
 
     # optional GPU mode
     ptu.set_gpu_mode(variant['util_params']['use_gpu'], variant['util_params']['gpu_id'])

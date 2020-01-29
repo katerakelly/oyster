@@ -80,6 +80,51 @@ class Mlp(PyTorchModule):
             return output
 
 
+class Convnet(PyTorchModule):
+    def __init__(self, img_size, output_dim):
+        self.img_size = img_size
+        self.output_dim = output_dim
+        # TODO can't handle any other sizes right now
+        assert img_size == (64, 64, 3) and output_dim == 256
+        base_depth = 32
+
+        super().__init__()
+
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=base_depth, kernel_size=5, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(in_channels=base_depth, out_channels=base_depth * 2, kernel_size=3, stride=2, padding=1)
+        self.conv3 = nn.Conv2d(in_channels=base_depth * 2, out_channels=base_depth * 4, kernel_size=3, stride=2, padding=1)
+        self.conv4 = nn.Conv2d(in_channels=base_depth * 4, out_channels=base_depth * 8, kernel_size=3, stride=2, padding=1)
+        self.conv5 = nn.Conv2d(in_channels=base_depth * 8, out_channels=base_depth * 8, kernel_size=4, stride=1, padding=0)
+
+    def forward(self, in_):
+        # takes and returns: batch x feat
+        # reshape vector into B x H x W x C
+        h, w, c = self.img_size
+        in_ = in_.view(-1, h, w, c)
+        b = in_.shape[0]
+        # channels first
+        in_ = in_.permute(0, 3, 1, 2)
+
+        in_ = self.conv1(in_)
+        in_ = F.relu(in_)
+
+        in_ = self.conv2(in_)
+        in_ = F.relu(in_)
+
+        in_ = self.conv3(in_)
+        in_ = F.relu(in_)
+
+        in_ = self.conv4(in_)
+        in_ = F.relu(in_)
+
+        in_ = self.conv5(in_)
+        in_ = F.relu(in_)
+
+        in_ = in_.view(b, -1)
+
+        return in_
+
+
 class FlattenMlp(Mlp):
     """
     if there are multiple inputs, concatenate along dim 1

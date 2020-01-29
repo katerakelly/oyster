@@ -1,19 +1,22 @@
 {
-    "env_name": "cheetah-vel",
-    "n_train_tasks": 100,
-    "n_eval_tasks": 30,
+    "env_name": "cheetah-vel-img",
+    "obs_mode": "image",
+    "n_train_tasks": 20,
+    "n_eval_tasks": 20,
     "env_params": {
-        "n_tasks": 130
+        "n_tasks": 40
     }
     ,
     "algo_params": {
-        "num_initial_steps": 2000,
-        "num_steps_prior": 400,
+        "num_initial_steps": 200,
+        "num_steps_prior": 500,
         "num_steps_posterior": 0,
-        "num_extra_rl_steps_posterior": 600,
+        "num_extra_rl_steps_posterior": 500,
         "num_evals": 1,
-        "num_steps_per_eval": 600,
+        "num_steps_per_eval": 101,
         "num_exp_traj_eval": 2,
+        "reward_scale": 5.0,
+        "max_path_length": 50,
         "embedding_batch_size": 100,
         "embedding_mini_batch_size": 100
     }

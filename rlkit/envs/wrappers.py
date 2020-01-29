@@ -136,11 +136,13 @@ class CameraWrapper(object):
 
     def get_image(self, width=256, height=256, camera_name=None):
         # use sim.render to avoid MJViewer which doesn't seem to work without display
-        return self.sim.render(
+        img = self.sim.render(
             width=width,
             height=height,
             camera_name=camera_name,
         )
+        img = np.flipud(img)
+        return img
 
     def initialize_camera(self):
         # set camera parameters for viewing
@@ -154,3 +156,4 @@ class CameraWrapper(object):
 
     def __getattr__(self, attrname):
         return getattr(self._wrapped_env, attrname)
+

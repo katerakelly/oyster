@@ -65,7 +65,11 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
         self.sparse_rewards = sparse_rewards
         self.use_next_obs_in_context = use_next_obs_in_context
 
-        self.qf1, self.qf2, self.vf = nets[1:]
+        if nets[-1]: # hack: will be None if not using cnn
+            self.qf1, self.qf2, self.vf, self.cnn = nets[1:]
+        else:
+            self.qf1, self.qf2, self.vf, _ = nets[1:]
+            self.cnn = None
         self.target_vf = self.vf.copy()
 
         self.policy_optimizer = optimizer_class(
@@ -88,6 +92,11 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
             self.agent.context_encoder.parameters(),
             lr=context_lr,
         )
+        if self.cnn is not None:
+            self.cnn_optimizer = optimizer_class(
+                self.cnn.parameters(),
+                lr=context_lr,
+            )
 
     ###### Torch stuff #####
     @property
@@ -137,14 +146,28 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
         context = [self.unpack_batch(batch, sparse_reward=self.sparse_rewards) for batch in batches]
         # group like elements together
         context = [[x[i] for x in context] for i in range(len(context[0]))]
-        context = [torch.cat(x, dim=0) for x in context]
-        # full context consists of [obs, act, rewards, next_obs, terms]
-        # if dynamics don't change across tasks, don't include next_obs
-        # don't include terminals in context
-        if self.use_next_obs_in_context:
-            context = torch.cat(context[:-1], dim=2)
+        # if using image observations, extract features before concat with rest of context
+        if self.cnn:
+            obs, acts, rewards, next_obs, terms = context
+            obs = [self.cnn(x)[None] for x in obs] # each x is 1 x batch x feature, output is batch x feat
+            obs = torch.cat(obs, dim=0)
+            next_obs = [self.cnn(x)[None] for x in next_obs]
+            next_obs = torch.cat(next_obs, dim=0)
+            acts = torch.cat(acts, dim=0)
+            rewards = torch.cat(rewards, dim=0)
+            if self.use_next_obs_in_context:
+                context = torch.cat([obs, acts, rewards, next_obs], dim=2)
+            else:
+                context = torch.cat([obs, acts, rewards], dim=2)
         else:
-            context = torch.cat(context[:-2], dim=2)
+            context = [torch.cat(x, dim=0) for x in context]
+            # full context consists of [obs, act, rewards, next_obs, terms]
+            # if dynamics don't change across tasks, don't include next_obs
+            # don't include terminals in context
+            if self.use_next_obs_in_context:
+                context = torch.cat(context[:-1], dim=2)
+            else:
+                context = torch.cat(context[:-2], dim=2)
         return context
 
     ##### Training #####
@@ -182,8 +205,14 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
         # data is (task, batch, feat)
         obs, actions, rewards, next_obs, terms = self.sample_sac(indices)
 
+        # extract image features if needed
+        if self.cnn is not None:
+            t, b, _ = obs.size()
+            obs = self.cnn(obs).view(t, b, -1)
+            next_obs = self.cnn(next_obs).view(t, b, -1)
+
         # run inference in networks
-        policy_outputs, task_z = self.agent(obs, context)
+        policy_outputs, task_z = self.agent(obs.detach(), context)
         new_actions, policy_mean, policy_log_std, log_pi = policy_outputs[:4]
 
         # flattens out the task dimension
@@ -196,13 +225,15 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
         # encoder will only get gradients from Q nets
         q1_pred = self.qf1(obs, actions, task_z)
         q2_pred = self.qf2(obs, actions, task_z)
-        v_pred = self.vf(obs, task_z.detach())
+        v_pred = self.vf(obs.detach(), task_z.detach())
         # get targets for use in V and Q updates
         with torch.no_grad():
-            target_v_values = self.target_vf(next_obs, task_z)
+            target_v_values = self.target_vf(next_obs.detach(), task_z)
 
         # KL constraint on z if probabilistic
         self.context_optimizer.zero_grad()
+        if self.cnn is not None:
+            self.cnn_optimizer.zero_grad()
         if self.use_information_bottleneck:
             kl_div = self.agent.compute_kl_div()
             kl_loss = self.kl_lambda * kl_div
@@ -221,9 +252,11 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
         self.qf1_optimizer.step()
         self.qf2_optimizer.step()
         self.context_optimizer.step()
+        if self.cnn is not None:
+            self.cnn_optimizer.step()
 
         # compute min Q on the new actions
-        min_q_new_actions = self._min_q(obs, new_actions, task_z)
+        min_q_new_actions = self._min_q(obs.detach(), new_actions, task_z.detach())
 
         # vf update
         v_target = min_q_new_actions - log_pi
@@ -303,4 +336,6 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
             target_vf=self.target_vf.state_dict(),
             context_encoder=self.agent.context_encoder.state_dict(),
         )
+        if self.cnn is not None:
+            snapshot['cnn'] = self.cnn.state_dict()
         return snapshot

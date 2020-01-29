@@ -46,6 +46,7 @@ class PEARLAgent(nn.Module):
                  latent_dim,
                  context_encoder,
                  policy,
+                 cnn,
                  **kwargs
     ):
         super().__init__()
@@ -53,6 +54,7 @@ class PEARLAgent(nn.Module):
 
         self.context_encoder = context_encoder
         self.policy = policy
+        self.cnn = cnn
 
         self.recurrent = kwargs['recurrent']
         self.use_ib = kwargs['use_information_bottleneck']
@@ -103,10 +105,15 @@ class PEARLAgent(nn.Module):
         r = ptu.from_numpy(np.array([r])[None, None, ...])
         no = ptu.from_numpy(no[None, None, ...])
 
+        if self.cnn is not None:
+            o = self.cnn(o).view(1, 1, self.cnn.output_dim)
+            no = self.cnn(no).view(1, 1, self.cnn.output_dim)
+
         if self.use_next_obs_in_context:
             data = torch.cat([o, a, r, no], dim=2)
         else:
             data = torch.cat([o, a, r], dim=2)
+
         if self.context is None:
             self.context = data
         else:
@@ -148,6 +155,8 @@ class PEARLAgent(nn.Module):
         ''' sample action from the policy, conditioned on the task embedding '''
         z = self.z
         obs = ptu.from_numpy(obs[None])
+        if self.cnn is not None:
+            obs = self.cnn(obs)
         in_ = torch.cat([obs, z], dim=1)
         return self.policy.get_action(in_, deterministic=deterministic)
 
