@@ -54,7 +54,7 @@ class MujocoEnv(mujoco_env.MujocoEnv, Serializable):
     def init_serialization(self, locals):
         Serializable.quick_init(self, locals)
 
-    def log_diagnostics(self, paths):
+    def log_diagnostics(self, *args, **kwargs):
         pass
 
 
