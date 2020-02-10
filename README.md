@@ -35,11 +35,17 @@ The results for PEARL as well as all baselines on the six continuous control tas
 #### Instructions (just a squeeze of lemon)
 
 Clone this repo with `git clone --recurse-submodules`.
-To run the continous control benchmark experiments, you will need to install [MuJoCo 1.5](https://www.roboti.us/index.html).
-(To run environments where different tasks correspond to different model parameters (Walker and Hopper), MuJoCo131 is required.)
-Note that you will need to set `LD_LIBRARY_PATH` to point to both the MuJoCo binaries (something like `/$HOME/.mujoco/mjpro150/bin`) as well as the gpu drivers (something like `/usr/lib/nvidia-390`).
+To run the continous control benchmark experiments, you will need to install [MuJoCo](https://www.roboti.us/index.html).
+For the task distributions in which the reward function varies (Cheetah, Ant, Humanoid), install MuJoCo200. 
+Set `LD_LIBRARY_PATH` to point to both the MuJoCo binaries (`/$HOME/.mujoco/mujoco200/bin`) as well as the gpu drivers (something like `/usr/lib/nvidia-390`, you can find your version by running `nvidia-smi`).
 For the remaining dependencies, we recommend using [miniconda](https://docs.conda.io/en/latest/miniconda.html) - create our environment with `conda env create -f environment.yml`
 This installation has been tested only on 64-bit Ubuntu 16.04.
+
+For the task distributions where different tasks correspond to different model parameters (Walker and Hopper), MuJoCo131 is required.
+Simply install it the same way as MuJoCo200.
+These environments make use of the module `rand_param_envs` which is submoduled in this repository.
+Add the module to your python path, `export PYTHONPATH=./rand_param_envs:$PYTHONPATH`
+(Check out [direnv](https://direnv.net/) for handy directory-dependent path managenement.)
 
 Experiments are configured via `json` configuration files located in `./configs`. To reproduce an experiment, run:
 `python launch_experiment.py ./configs/[EXP].json`
