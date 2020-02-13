@@ -24,9 +24,11 @@ We ran our ProMP, MAML-TRPO, and RL2 baselines in the [reference ProMP repo](htt
 The results for PEARL as well as all baselines on the six continuous control tasks shown in Figure 3 may be downloaded [here](https://www.dropbox.com/s/3uorwtrqzury6wt/results_cont_control.zip?dl=0).
 
 #### TODO (where is my tiny fork?)
+- [ ] fix RNN encoder version that is currently incorrect!
+- [ ] add optional convolutional encoder for learning from images
 - [x] add Walker2D and ablation experiment scripts
 - [x] add jupyter notebook to visualize sparse point robot
-- [ ] policy simulation script
+- [x] policy simulation script
 - [x] add working Dockerfile for running experiments
 
 --------------------------------------
@@ -58,10 +60,13 @@ Experiments are configured via `json` configuration files located in `./configs`
 By default the code will use the GPU - to use CPU instead, set `use_gpu=False` in the appropriate config file.
 
 Output files will be written to `./output/[ENV]/[EXP NAME]` where the experiment name is uniquely generated based on the date.
-
 The file `progress.csv` contains statistics logged over the course of training.
-
 We recommend `viskit` for visualizing learning curves: https://github.com/vitchyr/viskit
+
+Network weights are also snapshotted during training.
+To evaluate a learned policy after training has concluded, run `sim_policy.py`.
+This script will run a given policy across a set of evaluation tasks and optionally generate a video of these trajectories.
+Rendering is offline and the video is saved to the experiment folder.
 
 --------------------------------------
 #### Communication (slurp!)

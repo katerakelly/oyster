@@ -17,10 +17,16 @@ from rlkit.torch.sac.policies import MakeDeterministic
 from rlkit.samplers.util import rollout
 
 
-def sim_policy(variant, num_trajs, save_video):
+def sim_policy(variant, path_to_exp, num_trajs=1, deterministic=False, save_video=False):
     '''
     simulate a trained policy adapting to a new task
     optionally save videos of the trajectories - requires ffmpeg
+
+    :variant: experiment configuration dict
+    :path_to_exp: path to exp folder
+    :num_trajs: number of trajectories to simulate per task (default 1)
+    :deterministic: if the policy is deterministic (default stochastic)
+    :save_video: whether to generate and save a video (default False)
     '''
 
     # create multi-task environment and sample tasks
@@ -57,13 +63,12 @@ def sim_policy(variant, num_trajs, save_video):
         **variant['algo_params']
     )
     # deterministic eval
-    agent = MakeDeterministic(agent)
+    if deterministic:
+        agent = MakeDeterministic(agent)
 
     # load trained weights (otherwise simulate random policy)
-    data_dir = variant['path_to_weights']
-    if data_dir is not None:
-        context_encoder.load_state_dict(torch.load(os.path.join(data_dir, 'context_encoder.pth')))
-        policy.load_state_dict(torch.load(os.path.join(data_dir, 'policy.pth')))
+    context_encoder.load_state_dict(torch.load(os.path.join(path_to_exp, 'context_encoder.pth')))
+    policy.load_state_dict(torch.load(os.path.join(path_to_exp, 'policy.pth')))
 
     # loop through tasks collecting rollouts
     all_rets = []
@@ -83,12 +88,12 @@ def sim_policy(variant, num_trajs, save_video):
 
     if save_video:
         # save frames to file temporarily
-        temp_dir = os.path.join(data_dir, 'temp')
+        temp_dir = os.path.join(path_to_exp, 'temp')
         os.makedirs(temp_dir, exist_ok=True)
         for i, frm in enumerate(video_frames):
             frm.save(os.path.join(temp_dir, '%06d.jpg' % i))
 
-        video_filename=os.path.join(data_dir, 'video.mp4'.format(idx))
+        video_filename=os.path.join(path_to_exp, 'video.mp4'.format(idx))
         # run ffmpeg to make the video
         os.system('ffmpeg -i {}/%06d.jpg -vcodec mpeg4 {}'.format(temp_dir, video_filename))
         # delete the frames
@@ -104,15 +109,17 @@ def sim_policy(variant, num_trajs, save_video):
 
 @click.command()
 @click.argument('config', default=None)
+@click.argument('path', default=None)
 @click.option('--num_trajs', default=3)
+@click.option('--deterministic', is_flag=True, default=False)
 @click.option('--video', is_flag=True, default=False)
-def main(config, num_trajs, video):
+def main(config, path, num_trajs, deterministic, video):
     variant = default_config
     if config:
         with open(osp.join(config)) as f:
             exp_params = json.load(f)
         variant = deep_update_dict(exp_params, variant)
-    sim_policy(variant, num_trajs, video)
+    sim_policy(variant, path, num_trajs, deterministic, video)
 
 
 if __name__ == "__main__":
