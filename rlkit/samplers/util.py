@@ -48,8 +48,6 @@ def rollout(env, agent, max_path_length=np.inf, accum_context=True, animated=Fal
         actions.append(a)
         agent_infos.append(agent_info)
         path_length += 1
-        if d:
-            break
         o = next_o
         if animated:
             env.render()
@@ -58,6 +56,8 @@ def rollout(env, agent, max_path_length=np.inf, accum_context=True, animated=Fal
             image = Image.fromarray(np.flipud(env.get_image()))
             env_info['frame'] = image
         env_infos.append(env_info)
+        if d:
+            break
 
     actions = np.array(actions)
     if len(actions.shape) == 1:
