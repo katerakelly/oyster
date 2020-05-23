@@ -17,6 +17,8 @@ We demonstrate how to integrate these task variables with off-policy RL algorith
 and adaptation efficiency. Our method outperforms prior algorithms in sample efficiency by 20-100X as well as
 in asymptotic performance on several meta-RL benchmarks.
 
+*Note 5/22/20: The ant-goal experiment is currently not reproduced correctly. We are aware of the problem and are looking into it. We do not anticipate pushing a fix before the Neurips 2020 deadline.*
+
 This is the reference implementation of the algorithm; however, some scripts for reproducing a few of the experiments from the paper are missing.
 This repository is based on [rlkit](https://github.com/vitchyr/rlkit).
 
