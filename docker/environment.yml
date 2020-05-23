@@ -11,84 +11,86 @@ dependencies:
   - ca-certificates=2019.5.15=0
   - certifi=2018.8.24=py35_1
   - cffi=1.11.5=py35he75722e_1
-  - cudatoolkit=10.0
+  - cudatoolkit=10.0.130=0
   - cycler=0.10.0=py35hc4d5149_0
   - cython=0.28.5=py35hf484d3e_0
   - dbus=1.13.2=h714fa37_1
   - decorator=4.3.0=py35_0
   - expat=2.2.6=he6710b0_0
-  - fontconfig=2.12.1=3
-  - freetype=2.5.5=2
   - glib=2.56.2=hd408876_0
   - gst-plugins-base=1.14.0=hbbd80ab_1
   - gstreamer=1.14.0=hb453b48_1
   - hdf5=1.10.2=hba1933b_1
-  - icu=54.1=0
   - intel-openmp=2019.1=144
   - ipython=6.5.0=py35_0
   - ipython_genutils=0.2.0=py35hc9e07d0_0
   - jedi=0.12.1=py35_0
-  - joblib=0.9.4=py35_0
   - jpeg=9b=habf39ab_1
   - libffi=3.2.1=h4deb6c0_3
   - libgcc=7.2.0=h69d50b8_2
   - libgcc-ng=8.2.0=hdf63c60_1
   - libgfortran-ng=7.3.0=hdf63c60_0
-  - libiconv=1.14=0
   - libpng=1.6.35=hbc83047_0
   - libstdcxx-ng=8.2.0=hdf63c60_1
   - libxcb=1.13=h1bed415_1
-  - libxml2=2.9.4=0
   - llvmlite=0.20.0=py35_0
   - lockfile=0.12.2=py35_0
   - lz4-c=1.8.1.2=h14c3975_0
-  - lzo=2.10=h49e0be7_2
-  - mako=1.0.6=py35_0
   - markupsafe=1.0=py35h14c3975_1
-  - matplotlib=2.0.2=np111py35_0
   - mkl=2018.0.2=1
   - ninja=1.8.2=py35h6bb024c_1
-  - numba=0.35.0=np111py35_0
   - numexpr=2.6.5=py35h7bf3b9c_0
   - numpy=1.11.3=py35h3dfced4_4
   - openssl=1.0.2s=h7b6447c_0
   - parso=0.3.1=py35_0
   - patchelf=0.9=he6710b0_3
-  - path.py=10.3.1=py35_0
   - pcre=8.42=h439df22_0
   - pexpect=4.6.0=py35_0
   - pickleshare=0.7.4=py35hd57304d_0
   - pip=10.0.1=py35_0
+  - prompt_toolkit=1.0.15=py35hc09de7a_0
   - ptyprocess=0.6.0=py35_0
-  - pybox2d=2.3.1post2=py35_0
   - pycparser=2.19=py35_0
   - pygments=2.2.0=py35h0f41973_0
   - pyparsing=2.2.1=py35_0
-  - pyqt=5.6.0=py35_2
   - pytables=3.4.4=py35ha205bf6_0
-  - python=3.5.2=0
-  - python-dateutil=2.6.1=py35_0
   - pytz=2018.5=py35_0
-  - qt=5.6.2=5
-  - readline=6.2=2
   - scipy=1.0.1=py35hfc37229_0
   - setuptools=40.2.0=py35_0
   - simplegeneric=0.8.1=py35_2
   - sip=4.19.12=py35he6710b0_0
   - six=1.11.0=py35_1
-  - snappy=1.1.7=hbae5bb6_3
-  - sqlite=3.13.0=0
-  - tk=8.5.18=0
   - traitlets=4.3.2=py35ha522a97_0
   - wcwidth=0.1.7=py35hcd08066_0
   - wheel=0.31.1=py35_0
   - xz=5.2.4=h14c3975_4
   - zlib=1.2.11=h7b6447c_3
   - zstd=1.3.7=h0b5b093_0
+  - fontconfig=2.12.1=3
+  - freetype=2.5.5=2
+  - icu=54.1=0
+  - joblib=0.9.4=py35_0
+  - libiconv=1.14=0
+  - libxml2=2.9.4=0
+  - lzo=2.10=h49e0be7_2
+  - mako=1.0.6=py35_0
+  - matplotlib=2.0.2=np111py35_0
+  - numba=0.35.0=np111py35_0
+  - path.py=10.3.1=py35_0
+  - pyqt=5.6.0=py35_2
+  - python=3.5.2=0
+  - python-dateutil=2.6.1=py35_0
+  - qt=5.6.2=5
+  - readline=6.2=2
+  - snappy=1.1.7=hbae5bb6_3
+  - sqlite=3.13.0=0
+  - tk=8.5.18=0
+  - pybox2d=2.3.1post2=py35_0
   - pip:
     - absl-py==0.7.1
     - atari-py==0.1.7
     - bleach==3.1.0
+    - box2d==2.3.1
     - box2d-kengz==2.3.3
     - chardet==3.0.4
     - click==7.0
@@ -118,7 +120,7 @@ dependencies:
     - lxml==4.4.1
     - mistune==0.8.4
     - moviepy==1.0.0
-    - mujoco-py==2.0.2.5
+    - mujoco-py==1.50.1.63
     - nbconvert==5.4.0
     - nbformat==4.4.0
     - notebook==5.7.4
@@ -127,7 +129,6 @@ dependencies:
     - pillow==5.3.0
     - proglog==0.1.9
     - prometheus-client==0.5.0
-    - prompt-toolkit==1.0.15
     - pyglet==1.3.2
     - pyopengl==3.1.0
     - pyquaternion==0.9.5
@@ -137,6 +138,7 @@ dependencies:
     - seaborn==0.9.0
     - send2trash==1.5.0
     - smmap2==2.0.5
+    - tables==3.4.4
     - terminado==0.8.1
     - testpath==0.4.2
     - torch==1.0.1
