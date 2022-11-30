@@ -40,12 +40,14 @@ default_config = dict(
         update_post_train=1, # how often to resample the context when collecting data during training (in trajectories)
         num_exp_traj_eval=1, # how many exploration trajs to collect before beginning posterior sampling at test time
         recurrent=False, # recurrent or permutation-invariant encoder
+        use_traj_context=False, # use traj or tran as the context
         dump_eval_paths=False, # whether to save evaluation trajectories
     ),
     util_params=dict(
         base_log_dir='output',
         use_gpu=True,
         gpu_id=0,
+        seed=0,
         debug=False, # debugging triggers printing and writes logs to debug directory
         docker=False, # TODO docker is not yet supported
     )

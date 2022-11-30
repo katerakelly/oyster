@@ -10,16 +10,16 @@ class SimpleReplayBuffer(ReplayBuffer):
         self._observation_dim = observation_dim
         self._action_dim = action_dim
         self._max_replay_buffer_size = max_replay_buffer_size
-        self._observations = np.zeros((max_replay_buffer_size, observation_dim))
+        self._observations = np.zeros((max_replay_buffer_size, observation_dim), dtype=np.float32)
         # It's a bit memory inefficient to save the observations twice,
         # but it makes the code *much* easier since you no longer have to
         # worry about termination conditions.
-        self._next_obs = np.zeros((max_replay_buffer_size, observation_dim))
-        self._actions = np.zeros((max_replay_buffer_size, action_dim))
+        self._next_obs = np.zeros((max_replay_buffer_size, observation_dim), dtype=np.float32)
+        self._actions = np.zeros((max_replay_buffer_size, action_dim), dtype=np.float32)
         # Make everything a 2D np array to make it easier for other code to
         # reason about the shape of the data
-        self._rewards = np.zeros((max_replay_buffer_size, 1))
-        self._sparse_rewards = np.zeros((max_replay_buffer_size, 1))
+        self._rewards = np.zeros((max_replay_buffer_size, 1), dtype=np.float32)
+        self._sparse_rewards = np.zeros((max_replay_buffer_size, 1), dtype=np.float32)
         # self._terminals[i] = a terminal was received at time i
         self._terminals = np.zeros((max_replay_buffer_size, 1), dtype='uint8')
         self.clear()
@@ -76,7 +76,7 @@ class SimpleReplayBuffer(ReplayBuffer):
         indices = []
         while len(indices) < batch_size:
             # TODO hack to not deal with wrapping episodes, just don't take the last one
-            start = np.random.choice(self.episode_starts[:-1])
+            start = np.random.choice(self._episode_starts[:-1]) ## previous one is self.episode_starts which should be a typo
             pos_idx = self._episode_starts.index(start)
             indices += list(range(start, self._episode_starts[pos_idx + 1]))
             i += 1

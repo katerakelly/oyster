@@ -231,7 +231,8 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
         gt.stamp('sample')
 
     def _try_to_eval(self, epoch):
-        logger.save_extra_data(self.get_extra_data_to_save(epoch))
+        if (epoch+1) % 50 == 0: ## save RB every 50 epochs
+            logger.save_extra_data(self.get_extra_data_to_save(epoch))
         if self._can_evaluate():
             self.evaluate(epoch)
 
@@ -417,7 +418,9 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
         for idx in indices:
             self.task_idx = idx
             self.env.reset_task(idx)
+            self.agent.clear_z() ## I add this!!
             paths = []
+
             for _ in range(self.num_steps_per_eval // self.max_path_length):
                 context = self.sample_context(idx)
                 self.agent.infer_posterior(context)
