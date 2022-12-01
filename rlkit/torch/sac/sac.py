@@ -29,6 +29,7 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
             policy_pre_activation_weight=0.,
             optimizer_class=optim.Adam,
             recurrent=False,
+            use_traj_context=False,
             use_information_bottleneck=True,
             use_next_obs_in_context=False,
             sparse_rewards=False,
@@ -54,6 +55,7 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
         self.render_eval_paths = render_eval_paths
 
         self.recurrent = recurrent
+        self.use_traj_context = use_traj_context 
         self.latent_dim = latent_dim
         self.qf_criterion = nn.MSELoss()
         self.vf_criterion = nn.MSELoss()
@@ -133,7 +135,7 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
         # make method work given a single task index
         if not hasattr(indices, '__iter__'):
             indices = [indices]
-        batches = [ptu.np_to_pytorch_batch(self.enc_replay_buffer.random_batch(idx, batch_size=self.embedding_batch_size, sequence=self.recurrent)) for idx in indices]
+        batches = [ptu.np_to_pytorch_batch(self.enc_replay_buffer.random_batch(idx, batch_size=self.embedding_batch_size, sequence=self.use_traj_context)) for idx in indices]
         context = [self.unpack_batch(batch, sparse_reward=self.sparse_rewards) for batch in batches]
         # group like elements together
         context = [[x[i] for x in context] for i in range(len(context[0]))]

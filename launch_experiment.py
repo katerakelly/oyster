@@ -15,7 +15,7 @@ from rlkit.torch.sac.policies import TanhGaussianPolicy
 from rlkit.torch.networks import FlattenMlp, MlpEncoder, RecurrentEncoder
 from rlkit.torch.sac.sac import PEARLSoftActorCritic
 from rlkit.torch.sac.agent import PEARLAgent
-from rlkit.launchers.launcher_util import setup_logger
+from rlkit.launchers.launcher_util import setup_logger, set_seed
 import rlkit.torch.pytorch_util as ptu
 from configs.default import default_config
 
@@ -123,17 +123,29 @@ def deep_update_dict(fr, to):
 
 @click.command()
 @click.argument('config', default=None)
-@click.option('--gpu', default=0)
+@click.option('--gpu_id', default=0)
 @click.option('--docker', is_flag=True, default=False)
 @click.option('--debug', is_flag=True, default=False)
-def main(config, gpu, docker, debug):
+@click.option('--seed', default=0) 
+@click.option('--rnn/--mlp', default=False, help='choose the encoder network, RNN or MLP') 
+@click.option('--traj/--tran', default=False, help='use traj or tran context') 
+@click.option('--srb', is_flag=True, help="save_replay_buffer") ##
+def main(config, gpu_id, seed, srb, rnn, traj, docker, debug):
+
+    set_seed(seed)
 
     variant = default_config
     if config:
         with open(os.path.join(config)) as f:
             exp_params = json.load(f)
         variant = deep_update_dict(exp_params, variant)
-    variant['util_params']['gpu_id'] = gpu
+    variant['util_params']['gpu_id'] = gpu_id
+    variant['util_params']['seed'] = seed
+    variant['algo_params']['save_replay_buffer'] = srb 
+    variant['algo_params']['recurrent'] = rnn 
+    variant['algo_params']['use_traj_context'] = traj 
+    ## with rnn/mlp and traj/tran, we can build the four cases easily
+    ## rnn-tran, rnn-traj, mlp-tran(default), mlp-traj
 
     experiment(variant)
 

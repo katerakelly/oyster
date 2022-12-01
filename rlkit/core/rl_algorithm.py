@@ -231,7 +231,8 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
         gt.stamp('sample')
 
     def _try_to_eval(self, epoch):
-        logger.save_extra_data(self.get_extra_data_to_save(epoch))
+        if (epoch+1) % 50 == 0: ## save RB every 50 epochs
+            logger.save_extra_data(self.get_extra_data_to_save(epoch))
         if self._can_evaluate():
             self.evaluate(epoch)
 
@@ -417,7 +418,9 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
         for idx in indices:
             self.task_idx = idx
             self.env.reset_task(idx)
+            self.agent.clear_z() ## I add this which make rnn encoder works!
             paths = []
+
             for _ in range(self.num_steps_per_eval // self.max_path_length):
                 context = self.sample_context(idx)
                 self.agent.infer_posterior(context)
@@ -458,8 +461,8 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
         self.eval_statistics['AverageTrainReturn_all_train_tasks'] = train_returns
         self.eval_statistics['AverageReturn_all_train_tasks'] = avg_train_return
         self.eval_statistics['AverageReturn_all_test_tasks'] = avg_test_return
-        logger.save_extra_data(avg_train_online_return, path='online-train-epoch{}'.format(epoch))
-        logger.save_extra_data(avg_test_online_return, path='online-test-epoch{}'.format(epoch))
+        # logger.save_extra_data(avg_train_online_return, path='online-train-epoch{}'.format(epoch))
+        # logger.save_extra_data(avg_test_online_return, path='online-test-epoch{}'.format(epoch))
 
         for key, value in self.eval_statistics.items():
             logger.record_tabular(key, value)

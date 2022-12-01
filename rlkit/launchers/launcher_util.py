@@ -14,6 +14,7 @@ import __main__ as main
 import datetime
 import dateutil.tz
 import numpy as np
+import torch
 
 from rlkit.core import logger
 from rlkit.launchers import config
@@ -197,8 +198,37 @@ def create_simple_exp_name():
     timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
     return timestamp
 
+def create_method_exp_name(variant):
+    """
+    Create a semi-unique experiment name that has a timestamp
+    which network structure: rnn or mlp
+    which context type: traj or tran?
+    """
+    now = datetime.datetime.now(dateutil.tz.tzlocal())
+    timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
 
-def create_log_dir(exp_prefix, exp_id=None, seed=0, base_log_dir=None):
+    seed=variant['util_params']['seed']
+    recurrent = variant['algo_params']['recurrent']
+    traj = variant['algo_params']['use_traj_context']
+
+    exp_name = timestamp
+
+    if recurrent:
+        exp_name = exp_name + "-rnn"
+    else:
+        exp_name = exp_name + "-mlp"
+
+    if traj:
+        exp_name = exp_name + "-traj"
+    else:
+        exp_name = exp_name + "-tran"
+
+    exp_name = exp_name + f'-sd{seed}'
+
+    return exp_name
+
+
+def create_log_dir(exp_prefix, exp_id=None, variant=None, base_log_dir=None):
     """
     Creates and returns a unique log directory.
 
@@ -210,7 +240,8 @@ def create_log_dir(exp_prefix, exp_id=None, seed=0, base_log_dir=None):
         base_log_dir = config.LOCAL_LOG_DIR
     exp_name = exp_id
     if exp_name is None:
-        exp_name = create_simple_exp_name()
+        # exp_name = create_simple_exp_name()
+        exp_name = create_method_exp_name(variant)
     log_dir = osp.join(base_log_dir, exp_prefix.replace("_", "-"), exp_name)
     os.makedirs(log_dir, exist_ok=True)
     return log_dir
@@ -219,7 +250,7 @@ def create_log_dir(exp_prefix, exp_id=None, seed=0, base_log_dir=None):
 def setup_logger(
         exp_prefix="default",
         exp_id=0,
-        seed=0,
+        # seed=0,
         variant=None,
         base_log_dir=None,
         text_log_file="debug.log",
@@ -261,7 +292,7 @@ def setup_logger(
     """
     first_time = log_dir is None
     if first_time:
-        log_dir = create_log_dir(exp_prefix, exp_id=exp_id, seed=seed,
+        log_dir = create_log_dir(exp_prefix, exp_id=exp_id, variant=variant,
                                  base_log_dir=base_log_dir)
 
     if variant is not None:
@@ -343,6 +374,8 @@ def set_seed(seed):
     seed = int(seed)
     random.seed(seed)
     np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 
 def reset_execution_environment():
